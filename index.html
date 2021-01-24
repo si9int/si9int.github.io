@@ -1,1 +1,66 @@
-<h1>Test</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SI9INT | Whitehat in own definition</title>
+    <meta charset="utf-8">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet"> 
+    <style>
+        body {
+            background-color: #222;
+            color: #f3f3f3;
+            font-family: 'JetBrains Mono', monospace;
+            margin: 2rem;
+        }
+        h1 {font-weight: normal;}
+        a {color: #ddd;}
+    </style>
+</head>
+<body>
+    <h1>./SI9INT.sh</h1>
+    <p>
+    </p>
+    <script>
+        var text =[
+        `
+            Booting sequence ..............................
+            $cat welcome.txt\n
+            "Welcome to my personal home-page!"
+            "I like philosophy, music, arts, programming (<a href="github.com/si9int">Github</a>) & hacking stuff"\n
+            $cat references.txt\n
+            <ul><li><a href="https://www.dell.com/learn/nz/en/nzbsd1/campaigns/contributors-dell-software-security#campaignTabs-3">Dell</a></li><li>ESET Anti Virus</li><li>DFIN</li><li>Harvard University</li><li><a href="https://www.sync.com/help/online-service-acknowledgements/">Sync.com Inc</a></li><li><a href="https://psirt.bosch.com/en/acknowledgments.html">Bosch</a></li><li><a href="https://www.eff.org/security/hall-of-fame">Electronic Frontier Foundation</a></li><li><a href="https://hackerone.com/si9int">U.S. Department of Defense</a></li><li><a href="https://www.phpmyadmin.net/security/PMASA-2018-7/">phpMyAdmin</a></li><li><a href="https://unite.un.org/content/hall-fame">United Nations</a></li><li><a href="https://www.philips.com/a-w/security/coordinated-vulnerability-disclosure/hall-of-honors.html">Phillips</a></li><li><a href="https://cert.europa.eu/cert/newsletter/en/latest_HallOfFame_.html">CERT Europe</a></li><li>Red Bull</li><li><a href="https://www.bmwgroup.com/en/general/Security.html">BMW Group</a></li><li><a href="https://www.fortiguard.com/psirt/FG-IR-19-258">Fortinet</a></li><li><a href="https://portal.msrc.microsoft.com/en-us/security-guidance/researcher-acknowledgments-online-services">Microsoft</a></li><li>Docker</li><li><a href="https://hackerone.com/duckduckgo/thanks">DuckDuckGo</a></li></ul>
+            \n$cat contact.txt\n
+            "si9int[at]tutb.io" with b=c ^ c=a\n\n
+            SIGTERM
+        `];
+        function write(text, i, cb) {
+            if(i < (text.length)) {
+                document.querySelector("p").innerHTML = replace(text.substring(0, i+1));
+                setTimeout(function() {
+                    write(text, i+1, cb)
+                }, 25);
+            }
+            else if(typeof cb == 'function') {}
+        }
+
+        function replace(text) {
+            text = text.replace(/\t/g, '<span class="spacer"></span>')
+            return text.replace(/\n/g, '<br>');
+        }
+
+        function animate(i) {
+            if(typeof text[i] == 'undefined') {
+                setTimeout(function() {
+                    animate(0);
+                }, 1000000);
+            }
+            if(i < text[i].length) {
+                write(text[i], 0, function() {
+                    animate(i+1);
+                })
+            }
+        }
+        animate(0);
+    </script>
+</body>
+</html>
