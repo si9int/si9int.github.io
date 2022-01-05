@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Welcome</title>
+    <link>https://si9int.sh/categories/</link>
+    <description>Recent content in Categories on Welcome</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 01 Jan 2022 02:01:58 +0530</lastBuildDate><atom:link href="https://si9int.sh/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Spring</title>
+      <link>https://si9int.sh/categories/spring/</link>
+      <pubDate>Sat, 01 Jan 2022 02:01:58 +0530</pubDate>
+      
+      <guid>https://si9int.sh/categories/spring/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Web</title>
+      <link>https://si9int.sh/categories/web/</link>
+      <pubDate>Sat, 01 Jan 2022 02:01:58 +0530</pubDate>
+      
+      <guid>https://si9int.sh/categories/web/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

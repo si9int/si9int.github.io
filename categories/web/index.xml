@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Web on Welcome</title>
+    <link>https://si9int.sh/categories/web/</link>
+    <description>Recent content in Web on Welcome</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 01 Jan 2022 02:01:58 +0530</lastBuildDate><atom:link href="https://si9int.sh/categories/web/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>&#34;Spring Boot&#34;-Actuators and SSRF</title>
+      <link>https://si9int.sh/posts/spring-boot-ssrf/</link>
+      <pubDate>Sat, 01 Jan 2022 02:01:58 +0530</pubDate>
+      
+      <guid>https://si9int.sh/posts/spring-boot-ssrf/</guid>
+      <description>1. Intro A respective colleague of mine Wyatt Dahlenburg recently described in a blog article how a mis-configured &amp;ldquo;Spring Boot&amp;rdquo; application can be used to create an opportunity for SSRF (Server Side Request Forgery) attacks.
+The &amp;ldquo;Spring Framework&amp;rdquo; is an application framework designed for the Java development platform and commonly used to develop web applications like REST-APIs. The &amp;ldquo;Spring Boot&amp;rdquo; extension provides a &amp;ldquo;ready to run&amp;rdquo; environment which allows creating (standalone) Spring-based applications.</description>
+    </item>
+    
+    <item>
+      <title>AWS Tackling Server Side Request Forgery</title>
+      <link>https://si9int.sh/posts/aws-tackling-ssrf/</link>
+      <pubDate>Wed, 15 Dec 2021 02:01:58 +0530</pubDate>
+      
+      <guid>https://si9int.sh/posts/aws-tackling-ssrf/</guid>
+      <description>New Amazon EC2 (Amazon Elastic Compute Cloud) instances are capable of defending exploitation attempts using common GET-based SSRF (Server Side Request Forgery) vulnerabilities. The IMDSv2 (Instance Metadata Service Version 2) now mitigates such endeavour by restricting the metadata service using conditional authentication:
+ A HTTP-PUT request to 169.254.169.254/latest/api/token needs to be made for generating a token using a custom HTTP-header x-aws-ec2-metadata-token-ttl-seconds which holds the number of seconds the requested token is valid for.</description>
+    </item>
+    
+  </channel>
+</rss>

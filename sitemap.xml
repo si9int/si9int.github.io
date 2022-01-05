@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://si9int.sh/posts/spring-boot-ssrf/</loc>
+    <lastmod>2022-01-01T02:01:58+05:30</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://si9int.sh/categories/</loc>
+    <lastmod>2022-01-01T02:01:58+05:30</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://si9int.sh/posts/</loc>
+    <lastmod>2022-01-01T02:01:58+05:30</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://si9int.sh/categories/spring/</loc>
+    <lastmod>2022-01-01T02:01:58+05:30</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://si9int.sh/categories/web/</loc>
+    <lastmod>2022-01-01T02:01:58+05:30</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://si9int.sh/</loc>
+    <lastmod>2022-01-01T02:01:58+05:30</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://si9int.sh/posts/aws-tackling-ssrf/</loc>
+    <lastmod>2021-12-15T02:01:58+05:30</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://si9int.sh/about/</loc>
+  </url>
+  
+  <url>
+    <loc>https://si9int.sh/tags/</loc>
+  </url>
+  
+</urlset>

